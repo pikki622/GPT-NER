@@ -104,10 +104,9 @@ def compute_score_text2vec(test_mrcdata, train_mrcdata, knn=32):
     return values, index
 
 def write_file(dir_, data):
-    file = open(dir_, "w")
-    for item in data:
-        file.write(json.dumps(item, ensure_ascii=False)+'\n')
-    file.close()
+    with open(dir_, "w") as file:
+        for item in data:
+            file.write(json.dumps(item, ensure_ascii=False)+'\n')
 
 if __name__ == '__main__':
     # test_mrc = read_mrc_data(dir_="/nfs/shuhe/gpt3-ner/gpt3-data/zh_msra", prefix="test")[:2]

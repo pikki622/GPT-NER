@@ -13,10 +13,8 @@ def read_feature(dir_, prefix):
                          mode="r",
                          shape=(info_file["entity_num"], info_file["hidden_size"]))
     index_file = []
-    file = open(os.path.join(dir_, f"{prefix}.start_word_feature_index.json"), "r")
-    for line in file:
-        index_file.append(int(line.strip()))
-    file.close()
+    with open(os.path.join(dir_, f"{prefix}.start_word_feature_index.json"), "r") as file:
+        index_file.extend(int(line.strip()) for line in file)
     return info_file, features, index_file
 
 def read_mrc_data(dir_, prefix):
@@ -27,10 +25,8 @@ def read_idx(dir_, prefix="test"):
     print("reading ...")
     file_name = os.path.join(dir_, f"{prefix}.knn.jsonl")
     example_idx = []
-    file = open(file_name, "r")
-    for line in file:
-        example_idx.append(json.loads(line.strip()))
-    file.close()
+    with open(file_name, "r") as file:
+        example_idx.extend(json.loads(line.strip()) for line in file)
     return example_idx
 
 def compute_mrc_knn(test_info, test_features, train_info, train_features, train_index, knn_num=32):
@@ -76,9 +72,9 @@ def compute_simcse_knn(test_mrc_data, train_mrc_data, knn_num, test_index=None):
             train_sentence_index[label] = []
         train_sentence[label].append(context)
         train_sentence_index[label].append(idx_)
-    
+
     train_index = {}
-    for key, _ in train_sentence.items():
+    for key in train_sentence:
         embeddings = sim_model.encode(train_sentence[key], batch_size=128, normalize_to_unit=True, return_numpy=True)
         quantizer = faiss.IndexFlatIP(embeddings.shape[1])
         index = quantizer
@@ -102,7 +98,7 @@ def compute_simcse_knn(test_mrc_data, train_mrc_data, knn_num, test_index=None):
 
             example_idx.append([train_sentence_index[label][int(i)] for i in top_index[0]])
             example_value.append([float(value) for value in top_value[0]])
-        
+
         return example_idx, example_value
 
     for idx_, sub_index in enumerate(test_index):
@@ -116,14 +112,14 @@ def compute_simcse_knn(test_mrc_data, train_mrc_data, knn_num, test_index=None):
 
         example_idx.append([train_sentence_index[label][int(i)] for i in top_index[0]])
         example_value.append([float(value) for value in top_value[0]])
-    
+
     return example_idx, example_value
 
 def combine_full_knn(test_index, mrc_knn_index, simcse_knn_index):
     results = []
     mrc_idx = 0
     simcse_idx = 0
-    for idx_, num in enumerate(test_index):
+    for num in test_index:
         if num == 0:
             results.append(simcse_knn_index[simcse_idx])
             simcse_idx += 1
@@ -138,7 +134,7 @@ def combine_full_knn(test_index, mrc_knn_index, simcse_knn_index):
             sub_results = sub_results[:knn_num]
             results.append(sub_results)
             mrc_idx += num
-    
+
     return results
 
 def random_knn(test_mrc_data, train_mrc_data, knn_num):
@@ -167,10 +163,9 @@ def random_knn(test_mrc_data, train_mrc_data, knn_num):
     return example_idx, None
 
 def write_file(dir_, data):
-    file = open(dir_, "w")
-    for item in data:
-        file.write(json.dumps(item, ensure_ascii=False)+'\n')
-    file.close()
+    with open(dir_, "w") as file:
+        for item in data:
+            file.write(json.dumps(item, ensure_ascii=False)+'\n')
 
 if __name__ == '__main__':
     # test_info, test_features, test_index = read_feature(dir_="/nfs/shuhe/gpt3-ner/gpt3-data/conll_mrc/start_word_embedding", prefix="test.100")

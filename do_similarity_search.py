@@ -14,10 +14,9 @@ def read_file(file_path):
 
 def write_file(file_path, results):
     print("============ writting ============")
-    file = open(file_path, "w")
-    for idx_ in tqdm(range(len(results))):
-        file.write(json.dumps(results[idx_])+'\n')
-    file.close()
+    with open(file_path, "w") as file:
+        for idx_ in tqdm(range(len(results))):
+            file.write(json.dumps(results[idx_])+'\n')
 
 def main():
     parser = argparse.ArgumentParser(description='build indexes for similarity search')

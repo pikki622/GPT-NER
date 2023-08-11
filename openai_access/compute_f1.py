@@ -13,11 +13,8 @@ def get_parser():
 def read_openai_file(file_name):
     print(f"read ... {file_name}")
 
-    file = open(file_name, "r")
-    results = []
-    for line in tqdm(file):
-        results.append(line.strip())
-    file.close()
+    with open(file_name, "r") as file:
+        results = [line.strip() for line in tqdm(file)]
     return results
 
 def read_mrc_file(file_name):

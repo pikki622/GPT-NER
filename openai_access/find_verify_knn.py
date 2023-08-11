@@ -16,24 +16,20 @@ def read_word_feature(dir_, prefix, np_float=np.float16):
     info_file = json.load(open(os.path.join(dir_, f"{prefix}.word_feature_info.json"), "r"))
     token_num = info_file["token_sum"]
     hidden_size = info_file["hidden_size"]
-    
-    index_list = []
-    index_file = open(os.path.join(dir_, f"{prefix}.word_feature_index.json"))
-    for line in index_file:
-        index_list.append(json.loads(line.strip()))
-    index_file.close()
 
+    index_list = []
+    with open(os.path.join(dir_, f"{prefix}.word_feature_index.json")) as index_file:
+        index_list.extend(json.loads(line.strip()) for line in index_file)
     features = np.memmap(os.path.join(dir_, f"{prefix}.word_feature.npy"), 
                          dtype=np_float,
                          mode="r",
                          shape=(token_num, hidden_size))
-    
-    word_feature = {
+
+    return {
         "info_file": info_file,
         "index_list": index_list,
-        "features": torch.from_numpy(features)
+        "features": torch.from_numpy(features),
     }
-    return word_feature
 
 def read_sentence_feature(dir_, prefix, np_float=np.float16):
     print(f"read ... {dir_}, {prefix}")
@@ -57,23 +53,20 @@ def read_sentence_feature(dir_, prefix, np_float=np.float16):
                          dtype=np_float,
                          mode="r",
                          shape=(sentence_num, max_seq_len, hidden_size))
-    
-    sentence_feature = {
+
+    return {
         "info_file": info_file,
         "start_mask": torch.from_numpy(start_mask),
         "end_mask": torch.from_numpy(end_mask),
-        "features": torch.from_numpy(features).to(torch.float).cuda()
+        "features": torch.from_numpy(features).to(torch.float).cuda(),
     }
-    return sentence_feature
 
 def read_gpt3_results(file_name):
     print(f"read ... {file_name}")
 
     results = []
-    file = open(file_name, "r")
-    for line in file:
-        results.append(line.strip())
-    file.close()
+    with open(file_name, "r") as file:
+        results.extend(line.strip() for line in file)
     return results
 
 def find_knn(mrc_training_set, training_word_features, gpt3_results, test_sentence_features, knn_num=32):
@@ -176,10 +169,9 @@ def find_knn(mrc_training_set, training_word_features, gpt3_results, test_senten
     return knn_results
 
 def write_file(file_name, data):
-    file = open(file_name, "w")
-    for item in data:
-        file.write(json.dumps(item, ensure_ascii=False).strip()+'\n')
-    file.close()
+    with open(file_name, "w") as file:
+        for item in data:
+            file.write(json.dumps(item, ensure_ascii=False).strip()+'\n')
 
 if __name__ == '__main__':
     # mrc_training = read_mrc(file_name="/nfs1/shuhe/gpt3-ner/gpt3-data/en_conll_2003/mrc-ner.train.dev")

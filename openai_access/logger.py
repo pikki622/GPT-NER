@@ -25,5 +25,4 @@ logging.info("获取logger")
 def get_logger(name: str):
     """get sub-loggers"""
     print(f"获取logger: {name}")
-    logger = logging.getLogger(name)
-    return logger
+    return logging.getLogger(name)

@@ -9,10 +9,8 @@ import numpy as np
 def read_file(file_path):
     sentences = []
     print("============ reading ============")
-    file = open(file_path, "r")
-    for line in file:
-        sentences.append(line.strip())
-    file.close()
+    with open(file_path, "r") as file:
+        sentences.extend(line.strip() for line in file)
     return sentences
 
 def main():

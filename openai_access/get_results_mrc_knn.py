@@ -31,9 +31,8 @@ def read_mrc_data(dir_, prefix="test"):
     return json.load(open(file_name, encoding="utf-8"))
 
 def read_results(dir_):
-    file = open(dir_, "r")
-    resulst = file.readlines()
-    file.close()
+    with open(dir_, "r") as file:
+        resulst = file.readlines()
     return resulst
 
 def read_examples(dir_, prefix="dev"):
@@ -45,10 +44,8 @@ def read_idx(dir_, prefix="test"):
     print("reading ...")
     file_name = os.path.join(dir_, f"{prefix}.knn.jsonl")
     example_idx = []
-    file = open(file_name, "r")
-    for line in file:
-        example_idx.append(json.loads(line.strip()))
-    file.close()
+    with open(file_name, "r") as file:
+        example_idx.extend(json.loads(line.strip()) for line in file)
     return example_idx
 
 def mrc2prompt(mrc_data, data_name="CONLL", example_idx=None, train_mrc_data=None, example_num=16, last_results=None):
@@ -133,10 +130,9 @@ def ner_access(openai_access, ner_pairs, batch=16):
 def write_file(labels, dir_, last_name):
     print("writing ...")
     file_name = os.path.join(dir_, last_name)
-    file = open(file_name, "w")
-    for line in labels:
-        file.write(line.strip()+'\n')
-    file.close()
+    with open(file_name, "w") as file:
+        for line in labels:
+            file.write(line.strip()+'\n')
     # json.dump(labels, open(file_name, "w"), ensure_ascii=False)
 
 def test():

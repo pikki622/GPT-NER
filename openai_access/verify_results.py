@@ -34,19 +34,13 @@ def read_mrc_data(dir_, prefix="test"):
 
 def read_results(dir_, prefix="test"):
     file_name = os.path.join(dir_, prefix)
-    file = open(file_name, "r")
-    results = []
-    for line in tqdm(file):
-        results.append(line.strip())
-    file.close()
+    with open(file_name, "r") as file:
+        results = [line.strip() for line in tqdm(file)]
     return results
 
 def read_knn_file(file_name):
-    file = open(file_name, "r")
-    results = []
-    for line in tqdm(file):
-        results.append(json.loads(line.strip()))
-    file.close()
+    with open(file_name, "r") as file:
+        results = [json.loads(line.strip()) for line in tqdm(file)]
     return results
 
 def transferPrompt(mrc_data, gpt_results, data_name="CONLL", knn_results=None, knn_num=14):
@@ -133,9 +127,7 @@ def construct_results(gpt_results, entity_index, prompts_num, verify_results):
     def justify(string_):
         if len(string_) >= 3 and string_[:3].lower() == "yes":
             return "yes"
-        if len(string_) >= 2 and string_[:2].lower() == "no":
-            return "no"
-        return ""
+        return "no" if len(string_) >= 2 and string_[:2].lower() == "no" else ""
 
     results = []
     start_ = 0
@@ -157,10 +149,9 @@ def construct_results(gpt_results, entity_index, prompts_num, verify_results):
 def write_file(labels, dir_, last_name):
     print("writing ...")
     file_name = os.path.join(dir_, last_name)
-    file = open(file_name, "w")
-    for line in labels:
-        file.write(line.strip()+'\n')
-    file.close()
+    with open(file_name, "w") as file:
+        for line in labels:
+            file.write(line.strip()+'\n')
 
 if __name__ == '__main__':
     # test()

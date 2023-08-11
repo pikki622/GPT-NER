@@ -6,10 +6,7 @@ def read_results(dir_, ori_dir):
     # read prompt
     file_name = os.path.join(ori_dir, "mrc-ner.test")
     file = json.load(open(file_name, "r"))
-    prompt = []
-    for line in file:
-        prompt.append(line["context"])
-    
+    prompt = [line["context"] for line in file]
     # read results
     file_name = os.path.join(dir_, "results.tmp")
     file = open(file_name, "r")
@@ -22,13 +19,13 @@ def read_results(dir_, ori_dir):
                 break
             end_ += 1
         results_tmp.append(line[:end_])
-    
+
     print("========= changing tuple (results) =========")
     results = []
     for example_idx in tqdm(range(len(prompt))):
         prompt_token = prompt[example_idx].strip().split()
         results_token = results_tmp[example_idx].strip().split("\n")
-        
+
         match_tuple = []
         start_ = 0
         for ner_idx in range(len(results_token)):
@@ -44,7 +41,7 @@ def read_results(dir_, ori_dir):
                     break
                 start_ += 1
             match_tuple.append((start_, start_+len(ner_token)-1))
-        
+
         # print(prompt_token)
         # print(results_token)
         # print(match_tuple)
